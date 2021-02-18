@@ -1,4 +1,9 @@
 library(viridis)
+library(data.table)
+library(ggplot2)
+library(ggridges)
+library(patchwork)
+library(wesanderson)
 source('r/get_contact_matrices.R')
 source('r/get_eigenvalues.R')
 source('r/compare_Rs.R')
@@ -221,7 +226,7 @@ eig_frames = calculate_eigs_and_rats(eig_stats_ = eig_frames[[1]],
                                      tranvec_ = tranvec_fit)
 
 theme_set(cowplot::theme_cowplot(font_size = 14) + theme(strip.background = element_blank()))
-library(ggridges)
+
 p1 = ggplot(data = eig_frames[[3]], aes(x=Ratio, y=suscrule)) + 
   facet_wrap(~ Period, ncol=1)+
   geom_vline(xintercept = 1., size=1.5, linetype='dashed')+
@@ -292,7 +297,7 @@ p2 = ggplot(R_table) +
   theme(legend.position = "none")
   
   
-library(patchwork)
+
 
 layout <- "
 AAAAAABBBBBB
