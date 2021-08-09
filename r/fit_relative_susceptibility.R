@@ -33,6 +33,31 @@ opt_func_multi = function(x, par, i){
   
 }
 
+bbm_func_multi = function(s, sigma, i){
+  
+  #s = par[['s']]
+  #sigma = par[['sigma']]
+  tranvec = c(i,i,i,1,1,1,1,1,1)
+  suscvec = c(s,s,s,1,1,1,1,1,1)
+  eigs <- compare_Rs_stan(all_cms_all, breaks, weeks_range = sr_range, suscvec = suscvec, tranvec = tranvec)
+  
+  
+  Ms = mapply(function(X,Y){mean(england_rs[between(date, X, Y)]$mean)}, X=start_dates_an, Y=end_dates_an)
+  Ss = mapply(function(X,Y){mean(england_rs[between(date, X, Y)]$sd)}, X=start_dates_an, Y=end_dates_an)
+  
+  gamma_params = mapply(function(X,Y){ConnMatTools::gammaParamsConvert(mean=X, sd=Y)}, X=Ms, Y=Ss)
+  
+  
+  Rsamps = eigs * sigma
+  
+  
+  ll = mapply(function(X,Y){dgamma(x=Y, shape=gamma_params[,X]$shape, scale=gamma_params[,X]$scale, log = TRUE)}, X=1:NWKS, Y=Rsamps)
+  
+  
+  -(sum(ll))
+  
+}
+
 
 
 
@@ -51,6 +76,10 @@ start_dates_an = sort(start_dates[survey_round %in% sr_range]$V1)
 end_dates_an = sort(end_dates[survey_round %in% (sr_range +1)]$V1)
 
 outs10_multi = optim(c(s = 0.3, sigma=0.5), lower=c(1e-5, 1e-5), fn = opt_func_multi, method = "L-BFGS-B", x=c(0,0), i=1.0)
+bbouts_10 = bbmle::mle2(bbm_func_multi, start =list(s = 0.3, sigma=0.5), fixed = list(i=1.0))
+
+summary(bbouts_10)
+bbprof_10 = bbmle::profile(bbouts_10)
 
 qs::qsave(outs10_multi,'outputs/fits/12_28_nojuly_nopeak.qs')
 
@@ -70,7 +99,11 @@ start_dates_an = sort(start_dates[survey_round %in% sr_range]$V1)
 end_dates_an = sort(end_dates[survey_round %in% (sr_range +1)]$V1)
 
 outs10_multi = optim(c(s = 0.3, sigma=0.5), lower = c(s = 1e-5, sigma = 1e-5), fn = opt_func_multi, method = "L-BFGS-B", x=c(0,0), i=1.0)
+bbouts_10 = bbmle::mle2(bbm_func_multi, start =list(s = 0.3, sigma=0.5), fixed = list(i=1.0))
 
+bbmle::summary(bbouts_10)
+bbprof_10 = bbmle::profile(bbouts_10)
+bbprof_10
 qs::qsave(outs10_multi,'outputs/fits/12_28_nojuly.qs')
 
 sr_range = c(12:20, 23:28)
@@ -172,6 +205,9 @@ all_cms_all  = get_all_cms_vals('England', 'bs', 1000, 50, sr_range, nwks=2, use
 start_dates_an = sort(start_dates[survey_round %in% sr_range]$V1)
 end_dates_an = sort(end_dates[survey_round %in% (sr_range +1)]$V1)
 outs10_multi = optim(c(s = 0.3, sigma=0.5), lower = c(s = 1e-5, sigma = 1e-5), fn = opt_func_multi, method = "L-BFGS-B", x=c(0,0), i=1.0)
+bbouts_10 = bbmle::mle2(bbm_func_multi, start =list(s = 0.3, sigma=0.5), fixed = list(i=1.0))
+
+bbprof_10 = bbmle::confint(bbouts_10)
 
 qs::qsave(outs10_multi,'outputs/fits/19_28_nopeak.qs')
 
