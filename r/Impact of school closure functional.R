@@ -713,7 +713,7 @@ all_summary[,Study := suscrule]
 vacc_imp  =
   
   ggplot(all_summary[suscrule != '1. Equal']) + 
-  geom_pointrange(aes(x =vaccination, y=rat50, ymin=rat05, ymax=rat95, color=Study)) + 
+  geom_pointrange(aes(x =vaccination, y=rat50, ymin=rat05, ymax=rat95, color=Study), position = position_dodge(width=0.25)) + 
   xlab('Vaccination scenario') + 
   ylab('Change in R relative to Lockdown 3 \n upon reopening of schools')+ 
   scale_y_continuous(
@@ -725,7 +725,7 @@ vacc_imp  =
     sec.axis = sec_axis( trans=~.*0.8, name="Absolute change from R = 0.8")
   )
 
-ggsave('outputs/plots/Figure1a.png', vacc_imp, width = 15, height = 10)
+ggsave('outputs/plots/Figure1a.pdf',  vacc_imp, width = 15, height = 10)
 
 all_summary_slim = all_summary[suscrule != '1. Equal',c('suscrule', 'vaccination', 'overallimpact')]
 
